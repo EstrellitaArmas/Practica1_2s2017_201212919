@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Management;
 
 
 namespace Practica1
@@ -20,4 +21,5 @@ namespace Practica1
             Application.Run(new MenuPrincipal());
         }
     }
+    
 }

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.button1 = new System.Windows.Forms.Button();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.dataDash = new System.Windows.Forms.DataGridView();
             this.nodo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ip = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.carnet = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -38,7 +38,7 @@
             this.txtIp = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.txtCarnet = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataDash)).BeginInit();
             this.SuspendLayout();
             // 
             // button1
@@ -51,21 +51,21 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // dataGridView1
+            // dataDash
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataDash.AllowUserToAddRows = false;
+            this.dataDash.AllowUserToDeleteRows = false;
+            this.dataDash.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataDash.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.nodo,
             this.ip,
             this.carnet,
             this.estado});
-            this.dataGridView1.Location = new System.Drawing.Point(23, 82);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.Size = new System.Drawing.Size(519, 150);
-            this.dataGridView1.TabIndex = 1;
+            this.dataDash.Location = new System.Drawing.Point(23, 82);
+            this.dataDash.Name = "dataDash";
+            this.dataDash.ReadOnly = true;
+            this.dataDash.Size = new System.Drawing.Size(519, 150);
+            this.dataDash.TabIndex = 1;
             // 
             // nodo
             // 
@@ -130,11 +130,11 @@
             this.Controls.Add(this.txtCarnet);
             this.Controls.Add(this.txtIp);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.dataDash);
             this.Controls.Add(this.button1);
             this.Name = "Dashboard";
             this.Text = "Dashboard";
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataDash)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -143,7 +143,7 @@
         #endregion
 
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView dataDash;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label txtIp;
         private System.Windows.Forms.DataGridViewTextBoxColumn nodo;

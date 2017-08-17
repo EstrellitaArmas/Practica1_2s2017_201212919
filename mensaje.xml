@@ -1,0 +1,10 @@
+<mensajes>
+    <mensaje>
+        <nodos>
+            <IP>192.168.10.101</IP>
+            <IP>192.168.10.102</IP>
+            <IP>192.168.10.90</IP>
+        </nodos>
+        <texto>((2 + 8) * 7 + (7 * (6 + 1))</texto>
+    </mensaje>
+</mensajes>

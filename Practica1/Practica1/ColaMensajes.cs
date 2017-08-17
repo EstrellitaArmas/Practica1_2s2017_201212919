@@ -7,7 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
+using System.Net;
+using System.IO;
 namespace Practica1
 {
     public partial class ColaMensajes : Form
@@ -16,6 +17,25 @@ namespace Practica1
         {
             InitializeComponent();
         }
-        
+        public static string HttpGet(string URI)
+        {
+            try
+            {
+                WebRequest req = System.Net.WebRequest.Create(URI);
+                WebResponse resp = req.GetResponse();
+                StreamReader sr = new System.IO.StreamReader(resp.GetResponseStream());
+                return sr.ReadToEnd().Trim();
+            }
+            catch
+            {
+                return "Verifique conexion con servidor";
+            }
+        }
+        private void btnOperar_Click(object sender, EventArgs e)
+        {
+
+            string url = "http://192.168.10.104:5000/operar";
+            txtInorden.Text = HttpGet(url);
+        }
     }
 }

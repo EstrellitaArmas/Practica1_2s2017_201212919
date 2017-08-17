@@ -31,6 +31,7 @@
             this.btnEnviarMensaje = new System.Windows.Forms.Button();
             this.btnVerCola = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
             // 
             // btnEnviarMensaje
@@ -41,6 +42,7 @@
             this.btnEnviarMensaje.TabIndex = 0;
             this.btnEnviarMensaje.Text = "Enviar Mensajes";
             this.btnEnviarMensaje.UseVisualStyleBackColor = true;
+            this.btnEnviarMensaje.Click += new System.EventHandler(this.btnEnviarMensaje_Click);
             // 
             // btnVerCola
             // 
@@ -62,6 +64,10 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
+            // 
             // Mensajes
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -81,5 +87,6 @@
         private System.Windows.Forms.Button btnEnviarMensaje;
         private System.Windows.Forms.Button btnVerCola;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }

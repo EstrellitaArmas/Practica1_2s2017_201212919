@@ -9,6 +9,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Management;
+using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Practica1
 {
@@ -17,7 +21,8 @@ namespace Practica1
         public Dashboard()
         {
             InitializeComponent();
-            string url = "http://127.0.0.1:5000/get_my_ip";
+            //string url = "http://192.168.10.104:5000/get_my_ip";
+            string url = "http://192.168.1.5:5000/get_my_ip";
             txtIp.Text = HttpGet(url);
 
         }
@@ -46,53 +51,123 @@ namespace Practica1
             System.IO.StreamReader sr = new System.IO.StreamReader(resp.GetResponseStream());
             return sr.ReadToEnd().Trim();
         }
+        public static void CambiarIp(string ip_address, string subnet_mask)
+        {
+            ManagementClass objMC = new ManagementClass("Win32_NetworkAdapterConfiguration");
+            ManagementObjectCollection objMOC = objMC.GetInstances();
+            foreach (ManagementObject objMO in objMOC)
+            {
+                if ((bool)objMO["IPEnabled"])
+                {
+                    try
+                    {
+                        ManagementBaseObject setIP;
+                        ManagementBaseObject newIP = objMO.GetMethodParameters("EnableStatic");
+                        newIP["IPAddress"] = new string[] { ip_address };
+                        newIP["SubnetMask"] = new string[] { subnet_mask };
+                        setIP = objMO.InvokeMethod("EnableStatic", newIP, null);
+                    }
+                    catch (Exception) { throw; }
+                }
+            }
+        }
+        public void MetodoGetConectado(string ipCarnet)
+        {
+            try
+            {
+                using (var cliente = new WebClient())
+                {
+                    var respuestaConvertidaString = cliente.DownloadString("http://192.168.1.5:5000/conectado");
+                    //var respuestaConvertidaString = cliente.DownloadString("http://"+ipCarnet+":5000/conectado");
+                    Console.WriteLine(respuestaConvertidaString);                    
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);                
+            }
+        }
+        public void MetodoPost()
+        {
+            using (var cliente = new WebClient())
+            {
+                var variablesEnviar = new System.Collections.Specialized.NameValueCollection();
+                variablesEnviar["var1"] = "Hola";
+                variablesEnviar["var2"] = "Mundo";
+
+                var respuestaMetodo = cliente.UploadValues("http://192.168.10.104:5000/metodoPost", variablesEnviar);
+                var respuestaConvertidaString = Encoding.Default.GetString(respuestaMetodo);
+                Console.WriteLine(respuestaConvertidaString);
+            }
+        }
+        
+        
         private void button1_Click(object sender, EventArgs e)
         {
-            
+          
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-               StreamReader sr = new StreamReader(openFileDialog1.FileName);
-               String json = sr.ReadToEnd();
+                StreamReader sr = new StreamReader(openFileDialog1.FileName);
+                String json = sr.ReadToEnd();
+                
+                // MetodoGetConectado("192.168.10.104");
+                string url = "http://192.168.1.5:5000/cargaJSON";
+                string jsonResponse = HttpPost(url, json);
+                MessageBox.Show(jsonResponse);
 
-                string url = "http://127.0.0.1:5000/cargaJSON";
-                MessageBox.Show(HttpPost(url, json));
+                dynamic stuff = JsonConvert.DeserializeObject(jsonResponse);
+
+                //JArray ip = stuff.nodos.nodo;
+                //foreach (object aPart in ip)
+                //{
+                //    Console.WriteLine(aPart);
+                //}
+                Console.WriteLine("1"+stuff.primero.ip);
+                string estado = "false";
+                if(stuff.primero.carnet != null)
+                {
+                    estado = "true";
+                }
+                string[] row0 = { "Nodo1", stuff.primero.ip, stuff.primero.carnet, estado };
+                dataDash.Rows.Add(row0);
+                if (stuff.primero.prox != null)
+                {
+                    int contador = 1;
+                    JObject name = stuff.primero.prox;
+                    stuff = JsonConvert.DeserializeObject(name.ToString());
+                    while (stuff.prox != null)
+                    {
+                        Console.WriteLine(stuff.ip);
+                        estado = "false";
+                        if (stuff.carnet != null)
+                        {
+                            estado = "true";
+                        }
+                        string[] row1 = { "Nodo"+contador++, stuff.ip, stuff.carnet, estado };
+                        dataDash.Rows.Add(row1);
+                        name = stuff.prox;
+                        stuff = JsonConvert.DeserializeObject(name.ToString());
+                        
+                    }
+                    Console.WriteLine(stuff.ip);
+                    estado = "false";
+                    if (stuff.carnet != null)
+                    {
+                        estado = "true";
+                    }
+                    string[] row2 = { "Nodo"+contador++, stuff.ip, stuff.carnet, estado };
+                    dataDash.Rows.Add(row2);
+                }
+                
+
 
                 sr.Close();
             }
 
-            //WebRequest request = WebRequest.Create("http://127.0.0.1:5000/metodo2");
-            //request.Credentials = CredentialCache.DefaultCredentials;
-            //request.Method = "POST";
-            //string postData = "This is a test that posts this string to a Web server.";
-            //byte[] byteArray = Encoding.UTF8.GetBytes(postData);
-            //// Set the ContentType property of the WebRequest.
-            //request.ContentType = "/h";
-            //// Set the ContentLength property of the WebRequest.
-            //request.ContentLength = byteArray.Length;
-            //// Get the request stream.
-            //Stream dataStream = request.GetRequestStream();
-            //// Write the data to the request stream.
-            //dataStream.Write(byteArray, 0, byteArray.Length);
-            //// Close the Stream object.
-            //dataStream.Close();
-            //// Get the response.
-            //WebResponse response = request.GetResponse();
-            //// Display the status.
-            //Console.WriteLine(((HttpWebResponse)response).StatusDescription);
-            //// Get the stream containing content returned by the server.
-            //dataStream = response.GetResponseStream();
-            //// Open the stream using a StreamReader for easy access.
-            //StreamReader reader = new StreamReader(dataStream);
-            //// Read the content.
-            //string responseFromServer = reader.ReadToEnd();
-            //// Display the content.
-            //Console.WriteLine(responseFromServer);
-            //// Clean up the streams.
-            //reader.Close();
-            //dataStream.Close();
-            //response.Close();
-
-        }            
+            // MetodoPost();
+            //MetodoGetConectado("192.168.10.104");
+            //CambiarIp("192.168.10.104","255.255.)
+        }
 
     }
 }

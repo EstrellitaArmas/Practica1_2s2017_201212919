@@ -40,7 +40,7 @@
             this.label7 = new System.Windows.Forms.Label();
             this.label8 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
+            this.txtInorden = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
@@ -54,6 +54,7 @@
             this.btnOperar.TabIndex = 0;
             this.btnOperar.Text = "Operar";
             this.btnOperar.UseVisualStyleBackColor = true;
+            this.btnOperar.Click += new System.EventHandler(this.btnOperar_Click);
             // 
             // label1
             // 
@@ -158,15 +159,15 @@
             this.label9.TabIndex = 10;
             this.label9.Text = "Operacion en inorden";
             // 
-            // label10
+            // txtInorden
             // 
-            this.label10.AutoSize = true;
-            this.label10.BackColor = System.Drawing.SystemColors.ButtonHighlight;
-            this.label10.Location = new System.Drawing.Point(12, 212);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(22, 13);
-            this.label10.TabIndex = 11;
-            this.label10.Text = "-----";
+            this.txtInorden.AutoSize = true;
+            this.txtInorden.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.txtInorden.Location = new System.Drawing.Point(12, 212);
+            this.txtInorden.Name = "txtInorden";
+            this.txtInorden.Size = new System.Drawing.Size(22, 13);
+            this.txtInorden.TabIndex = 11;
+            this.txtInorden.Text = "-----";
             // 
             // label11
             // 
@@ -194,7 +195,7 @@
             this.ClientSize = new System.Drawing.Size(434, 320);
             this.Controls.Add(this.label12);
             this.Controls.Add(this.label11);
-            this.Controls.Add(this.label10);
+            this.Controls.Add(this.txtInorden);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.label7);
@@ -228,7 +229,7 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label txtInorden;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label12;
     }
