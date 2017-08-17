@@ -121,6 +121,39 @@ class ColaMensajes(object):
             print "Nodo insertado :"+ str(aux.operacion)
             aux = aux.prox 
 
+class NodoPila(object):
+    def __init__(self, dato=None, siguiente = None):
+        self.dato = dato
+        self.siguiente = siguiente
+    def __str__(self):
+        return str(self.dato)
+
+class Pila(object):
+    def __init__(self):
+        self.ultimo = None 
+
+    def push(self, dato):
+        if self.ultimo != None:
+            temp = self.ultimo
+            self.ultimo = NodoPila(dato)
+            self.ultimo.siguiente = temp
+        else:
+            self.ultimo = NodoPila(dato)
+            
+    def pop(self):
+        if self.ultimo != None:
+            temp = self.ultimo
+            self.ultimo = temp.siguiente
+            return temp.dato
+        
+    def mostrarPila(self):
+        if self.ultimo != None:
+            temp = self.ultimo
+            print ("\nLos datos de la pila son: ")
+            while temp != None:
+                print (str(temp.dato))
+                temp = temp.siguiente 
+
 colaMensajes = ColaMensajes()
 @app.route('/cargaXML', methods=['POST'])
 def cargaXML():
@@ -143,7 +176,6 @@ def cargaXML():
     
     return "successful"
 
-
 @app.route('/mensaje', methods =['POST'])
 def mensaje():
     parametroPython = str(request.data)
@@ -151,15 +183,47 @@ def mensaje():
     colaMensajes.queue(NodoCola(request.data))
     #colaMensajes.imprimir()
     return "true"
+
 @app.route('/operar', methods = ['GET'])
 def operar():
-    #realizar operaciones aqui
-    textoEnviar = "resultado es : "
-    r = requests.post("http://192.168.10.101:5000/respuesta", data = textoEnviar)
-    if r.status_code == 200:
-        return r.text    
-    #return colaMensajes.dequeue()
-   
+    pilaNumero = Pila()
+    pilaOperador = Pila()
+    resultado = ""
+    postorden = ""
+    for x in request.data:
+        if x in (' ', '('):
+            print ""
+        elif x == ")": 
+            var1 = pilaNumero.pop()
+            var2 = pilaNumero.pop()
+            op = pilaOperador.pop() 
+            var3 = None
+            postorden = postorden + str(op)           
+            if op == "+":
+               var3 = int(var1) + int(var2)
+               print var3
+            elif op == "-":
+               var3 = int(var2) - int(var1)
+               print var3
+            elif op == "*":
+               var3 = int(var1) * int(var2)
+               print var3
+            elif op == "/":
+               var3 = int(var1) / int(var2)               
+               print var3
+            pilaNumero.push(var3)
+        elif x  in ('/', '*', '-', '+'):
+            pilaOperador.push(x)
+        else:
+            pilaNumero.push(x)
+            postorden = postorden + str(x) 
+            print x  
+
+    resultado = pilaNumero.pop()
+    return "true" + str(resultado)+ "POST"+ str(postorden)
+    #r = requests.post("http://192.168.10.101:5000/respuesta", data = resultado , postorden)
+    #if r.status_code == 200:
+    #    return r.text    
    
 @app.route('/respuesta',methods=['POST']) 
 def respuesta():
