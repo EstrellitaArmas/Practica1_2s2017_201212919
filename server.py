@@ -26,36 +26,34 @@ class ListaEnlazada(object):
         if self.primero == None :
             self.primero = nodo
             self.ultimo = nodo
-            #status()
         else :
             self.ultimo.prox = nodo
             self.ultimo = nodo
-            #status()
        
     def imprimir(self):
         aux = self.primero
         while aux != None:
             print "Nodo insertado :"+ str(aux.ip)
-            aux = aux.prox 
+            aux = aux.prox   
+    def modificar(self, ip = None , carnet = None):
+            aux = self.primero
+            while aux != None:
+                if aux.ip == ip:
+                    aux.carnet = carnet
+                aux = aux.prox   
 
-def jsonDefault(object):
-    return object.__dict__
 
-def status(aux = None):
-    aux = listaIp.primero
-    if aux != None :
-        r = requests.get("http://"+ aux.ip +":5000/conectado")
-        if r.status_code == 200:
-            return r.text        
 
-listaIp = ListaEnlazada()
 @app.route('/metodoPost',methods=['POST']) 
 def metodoPost():
     parametro = str(request.form['var1'])
     parametro2 = str(request.form['var2'])
     return parametro + parametro2
     
+def jsonDefault(object):
+    return object.__dict__
 
+listaIp = ListaEnlazada()
 @app.route('/cargaJSON',methods=['POST']) 
 def cargaJSON():
     nodos = (request.json)     
@@ -67,27 +65,36 @@ def cargaJSON():
                 print ": %s es %s:" % (clave2, valor2)                
             
     for clave3 in nodo:
-        r = requests.get("http://"+ clave3["ip"] +":5000/conectado")
-        if r.status_code == 200:
-            carnet = r.text         
-        listaIp.insertar(Nodo(clave3["ip"], carnet))
-        #response = response + str(clave3["ip"])
+        try:
+            r = requests.get("http://"+ clave3["ip"] +":5000/conectado")
+            if r.status_code == 200:
+                listaIp.insertar(Nodo(clave3["ip"], r.text))
+        except requests.exceptions.RequestException as e:
+            listaIp.insertar(Nodo(clave3["ip"], "-"))
+            print e
         #print "El valor de IP es %s y Mascara es %s " % (clave3["ip"],clave3["mascara"])
 
-    return json.dumps(listaIp, default = jsonDefault)
-    #return listaIp.status(Nodo(clave3["ip"], clave3["mascara"]))
-    #return listaIp.status()
-    #return "successful"
+    return json.dumps(listaIp, default = jsonDefault )
 
 @app.route('/conectado',methods=['GET'])
 def conectado():
     return "201212919"
 
-@app.route('/getStatus',methods=['POST'])
+@app.route('/getStatus',methods=['GET'])
 def status():
-    r = requests.get("http://"+ request.data +":5000/conectado")
-    if r.status_code == 200:
-        return r.text        
+    aux = listaIp.primero
+    while aux != None:
+        try:
+            r = requests.get("http://"+ aux.ip +":5000/conectado")
+            if r.status_code == 200:
+                listaIp.modificar(aux.ip,r.text)
+        except requests.exceptions.RequestException as e : 
+            listaIp.modificar(aux.ip, "-")
+            print e
+        aux = aux.prox  
+
+    
+    return json.dumps(listaIp, default = jsonDefault)
 
 ######################################################################
 class NodoCola(object):
@@ -102,7 +109,7 @@ class ColaMensajes(object):
     def __init__(self):
         self.primero = None
         self.ultimo = None
-
+        
     def queue(self, nodoCola = None):
         if self.primero == None :
             self.primero = nodoCola
@@ -110,10 +117,13 @@ class ColaMensajes(object):
         else :
             self.ultimo.prox = nodoCola
             self.ultimo = nodoCola
+
     def dequeue(self):
-        aux = self.primero
-        self.primero = aux.prox
-        return str(aux.operacion) 
+        if self.primero != None:
+            temp = self.primero
+            self.primero = temp.prox 
+            nodo = {'operacion': temp.operacion ,'ip':temp.ip }
+            return nodo 
        
     def imprimir(self):
         aux = self.primero
@@ -121,6 +131,39 @@ class ColaMensajes(object):
             print "Nodo insertado :"+ str(aux.operacion)
             aux = aux.prox 
 
+class NodoPila(object):
+    def __init__(self, dato=None, siguiente = None):
+        self.dato = dato
+        self.siguiente = siguiente
+    def __str__(self):
+        return str(self.dato)
+
+class Pila(object):
+    def __init__(self):
+        self.ultimo = None 
+
+    def push(self, dato):
+        if self.ultimo != None:
+            temp = self.ultimo
+            self.ultimo = NodoPila(dato)
+            self.ultimo.siguiente = temp
+        else:
+            self.ultimo = NodoPila(dato)
+            
+    def pop(self):
+        if self.ultimo != None:
+            temp = self.ultimo
+            self.ultimo = temp.siguiente
+            return temp.dato
+        
+    def mostrarPila(self):
+        if self.ultimo != None:
+            temp = self.ultimo
+            print ("\nLos datos de la pila son: ")
+            while temp != None:
+                print (str(temp.dato))
+                temp = temp.siguiente 
+                
 colaMensajes = ColaMensajes()
 @app.route('/cargaXML', methods=['POST'])
 def cargaXML():
@@ -146,19 +189,69 @@ def cargaXML():
 
 @app.route('/mensaje', methods =['POST'])
 def mensaje():
-    parametroPython = str(request.data)
-    #print parametroPython    
-    colaMensajes.queue(NodoCola(request.data))
-    #colaMensajes.imprimir()
+    #parametroPython = str(request.data)    
+    ipRecup = str(request.environ['REMOTE_ADDR'])
+    colaMensajes.queue(NodoCola(request.data,ipRecup))
+    #colaMensajes.queue(NodoCola(request.form["inorden"],ipRecup))
+    colaMensajes.imprimir()
+    #print ipRecup
     return "true"
+
 @app.route('/operar', methods = ['GET'])
 def operar():
-    #realizar operaciones aqui
-    textoEnviar = "resultado es : "
-    r = requests.post("http://192.168.10.101:5000/respuesta", data = textoEnviar)
-    if r.status_code == 200:
-        return r.text    
-    #return colaMensajes.dequeue()
+    pilaNumero = Pila()
+    pilaOperador = Pila()
+    resultado = ""
+    postorden = ""
+    nodo = colaMensajes.dequeue()
+    print nodo
+    if nodo != None:
+        operacion = nodo["operacion"]
+        ipRecup = nodo["ip"]
+        for x in str(operacion):
+            print x
+            if x in (' ', '('):
+                print ""
+            elif x == ")": 
+                var1 = pilaNumero.pop()
+                var2 = pilaNumero.pop()
+                op = pilaOperador.pop() 
+                postorden = postorden + str(op)           
+                if op == "+":
+                    var3 = int(var1) + int(var2)
+                    pilaNumero.push(var3)
+                    print (str(var3))
+                elif op == "-":
+                    var3 = int(var2) - int(var1)
+                    pilaNumero.push(var3)
+                    print var3
+                elif op == "*":
+                    var3 = int(var1) * int(var2)
+                    pilaNumero.push(var3)
+                    print var3
+                elif op == "/":
+                    var3 = int(var1) / int(var2)               
+                    pilaNumero.push(var3)
+                    print var3
+                
+            elif x  in ('/', '*', '-', '+'):
+                pilaOperador.push(x)
+            else:
+                pilaNumero.push(x)
+                postorden = postorden + str(x) 
+        
+        resultado = pilaNumero.pop()
+        nodo = {'resultado': resultado ,'postorden': postorden }
+        #return "true de prueba" + str(resultado)+ "POST"+ str(postorden)
+        try:
+            r = requests.post("http://"+ipRecup+":5000/respuesta", data = nodo)
+            if r.status_code == 200:
+                return r.text
+        except requests.exceptions.RequestException as e : 
+            print e    
+            return "No se pudo enviar el resultado"            
+    else:
+        return "la cola esta vacia"
    
    
 @app.route('/respuesta',methods=['POST']) 
@@ -170,10 +263,10 @@ def respuesta():
 
 
 #######################################################################
-@app.route('/hola') 
+@app.route('/hola')
 def he():
     return "hola Mundo"
 
 if __name__ == "__main__":
-    #app.run(debug=True, host='192.168.10.104')
+    #app.run(debug=True, host='192.168.10.101')
     app.run(debug=True, host='192.168.1.5')
