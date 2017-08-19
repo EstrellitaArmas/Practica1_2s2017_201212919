@@ -34,7 +34,8 @@ namespace Practica1
         private void btnOperar_Click(object sender, EventArgs e)
         {
 
-            string url = "http://192.168.10.104:5000/operar";
+            //string url = "http://192.168.10.104:5000/operar";
+            string url = "http://192.168.1.5:5000/operar";
             txtInorden.Text = HttpGet(url);
         }
     }

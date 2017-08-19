@@ -163,11 +163,7 @@ class Pila(object):
             while temp != None:
                 print (str(temp.dato))
                 temp = temp.siguiente 
-<<<<<<< HEAD
                 
-=======
-
->>>>>>> 8f7972d7bf617f85393384bd43608e20eec5701a
 colaMensajes = ColaMensajes()
 @app.route('/cargaXML', methods=['POST'])
 def cargaXML():
@@ -190,6 +186,7 @@ def cargaXML():
     
     return "successful"
 
+
 @app.route('/mensaje', methods =['POST'])
 def mensaje():
     #parametroPython = str(request.data)    
@@ -206,7 +203,6 @@ def operar():
     pilaOperador = Pila()
     resultado = ""
     postorden = ""
-<<<<<<< HEAD
     nodo = colaMensajes.dequeue()
     print nodo
     if nodo != None:
@@ -257,42 +253,6 @@ def operar():
     else:
         return "la cola esta vacia"
    
-=======
-    for x in request.data:
-        if x in (' ', '('):
-            print ""
-        elif x == ")": 
-            var1 = pilaNumero.pop()
-            var2 = pilaNumero.pop()
-            op = pilaOperador.pop() 
-            var3 = None
-            postorden = postorden + str(op)           
-            if op == "+":
-               var3 = int(var1) + int(var2)
-               print var3
-            elif op == "-":
-               var3 = int(var2) - int(var1)
-               print var3
-            elif op == "*":
-               var3 = int(var1) * int(var2)
-               print var3
-            elif op == "/":
-               var3 = int(var1) / int(var2)               
-               print var3
-            pilaNumero.push(var3)
-        elif x  in ('/', '*', '-', '+'):
-            pilaOperador.push(x)
-        else:
-            pilaNumero.push(x)
-            postorden = postorden + str(x) 
-            print x  
-
-    resultado = pilaNumero.pop()
-    return "true" + str(resultado)+ "POST"+ str(postorden)
-    #r = requests.post("http://192.168.10.101:5000/respuesta", data = resultado , postorden)
-    #if r.status_code == 200:
-    #    return r.text    
->>>>>>> 8f7972d7bf617f85393384bd43608e20eec5701a
    
 @app.route('/respuesta',methods=['POST']) 
 def respuesta():
