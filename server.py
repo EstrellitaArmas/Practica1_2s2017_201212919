@@ -8,7 +8,7 @@ app = Flask("server")
 def get_my_ip():
     #return jsonify({'ip': request.remote_addr}), 200
     return "ip " + request.remote_addr
-#########################################################################################
+##########################################DASHBOARD###################
 class Nodo(object):
     def __init__(self, ip=None,carnet= None, prox = None):
         self.ip = ip
@@ -42,8 +42,6 @@ class ListaEnlazada(object):
                     aux.carnet = carnet
                 aux = aux.prox   
 
-
-
 @app.route('/metodoPost',methods=['POST']) 
 def metodoPost():
     parametro = str(request.form['var1'])
@@ -56,7 +54,7 @@ def jsonDefault(object):
 listaIp = ListaEnlazada()
 @app.route('/cargaJSON',methods=['POST']) 
 def cargaJSON():
-    nodos = (request.json)     
+    nodos = (request.json)
     for clave, valor in nodos.iteritems():
         for clave2, valor2 in valor.iteritems():
             if clave2 == "nodo":
@@ -96,7 +94,7 @@ def status():
     
     return json.dumps(listaIp, default = jsonDefault)
 
-######################################################################
+##############################################MENSAJES################
 class NodoCola(object):
     def __init__(self, operacion =None, ip = None, prox = None):
         self.ip = ip
@@ -109,6 +107,7 @@ class ColaMensajes(object):
     def __init__(self):
         self.primero = None
         self.ultimo = None
+        self.tamanio = 0
         
     def queue(self, nodoCola = None):
         if self.primero == None :
@@ -117,12 +116,14 @@ class ColaMensajes(object):
         else :
             self.ultimo.prox = nodoCola
             self.ultimo = nodoCola
+        self.tamanio +=1
 
     def dequeue(self):
         if self.primero != None:
             temp = self.primero
             self.primero = temp.prox 
             nodo = {'operacion': temp.operacion ,'ip':temp.ip }
+            self.tamanio -=1
             return nodo 
        
     def imprimir(self):
@@ -165,6 +166,10 @@ class Pila(object):
                 temp = temp.siguiente 
                 
 colaMensajes = ColaMensajes()
+@app.route('/cntCola',methods = ['GET'])
+def cntCola():
+    tamanio = str(colaMensajes.tamanio)
+    return tamanio
 @app.route('/cargaXML', methods=['POST'])
 def cargaXML():
     textoEnviar = ""
@@ -191,8 +196,8 @@ def cargaXML():
 def mensaje():
     #parametroPython = str(request.data)    
     ipRecup = str(request.environ['REMOTE_ADDR'])
-    colaMensajes.queue(NodoCola(request.data,ipRecup))
-    #colaMensajes.queue(NodoCola(request.form["inorden"],ipRecup))
+    #colaMensajes.queue(NodoCola(request.data,ipRecup))
+    colaMensajes.queue(NodoCola(request.form["inorden"],ipRecup))
     colaMensajes.imprimir()
     #print ipRecup
     return "true"
@@ -203,6 +208,8 @@ def operar():
     pilaOperador = Pila()
     resultado = ""
     postorden = ""
+    numero = ""
+    colaEjecucion = ""
     nodo = colaMensajes.dequeue()
     print nodo
     if nodo != None:
@@ -213,40 +220,59 @@ def operar():
             if x in (' ', '('):
                 print ""
             elif x == ")": 
+                if numero != "":
+                    pilaNumero.push(numero)
+                    colaEjecucion += "push(" + numero +")\n"
+                    postorden = postorden  + numero + " "
+                    numero=""
+               
                 var1 = pilaNumero.pop()
                 var2 = pilaNumero.pop()
-                op = pilaOperador.pop() 
-                postorden = postorden + str(op)           
+                op = pilaOperador.pop()
+                colaEjecucion += "pop()\npop()\n"
+                postorden = postorden + str(op) + " "                          
                 if op == "+":
                     var3 = int(var1) + int(var2)
                     pilaNumero.push(var3)
-                    print (str(var3))
+                    colaEjecucion += str(var1)+"+"+str(var2) + "=" + str(var3) + "\npush(" + str(var3) +")\n"
+                    #print var3
                 elif op == "-":
                     var3 = int(var2) - int(var1)
                     pilaNumero.push(var3)
-                    print var3
+                    colaEjecucion += str(var2)+"-"+str(var1) + "=" + str(var3) + "\npush(" + str(var3) +")\n"
+                    #print var3
                 elif op == "*":
                     var3 = int(var1) * int(var2)
                     pilaNumero.push(var3)
-                    print var3
+                    colaEjecucion += str(var1)+"*"+str(var2) + "=" + str(var3) + "\npush(" + str(var3) +")\n"
+                    #print var3
                 elif op == "/":
-                    var3 = int(var1) / int(var2)               
+                    var3 = int(var2) / int(var1)               
                     pilaNumero.push(var3)
-                    print var3
+                    colaEjecucion += str(var2)+"/"+str(var1) + "=" + str(var3) + "\npush(" + str(var3) +")\n"
+                    #print var3
                 
             elif x  in ('/', '*', '-', '+'):
-                pilaOperador.push(x)
+                pilaOperador.push(x)                
+                if numero != "" :
+                    postorden = postorden  + numero + " "
+                    pilaNumero.push(numero)
+                    colaEjecucion += "push(" + numero +")\n"
+                    numero=""
             else:
-                pilaNumero.push(x)
-                postorden = postorden + str(x) 
-        
+                #pilaNumero.push(x)
+                numero = numero + x                
+                #postorden = postorden + " " + str(x) 
+
         resultado = pilaNumero.pop()
-        nodo = {'resultado': resultado ,'postorden': postorden }
+        nodo = {'resultado': resultado ,'postorden': postorden , 'inorden' : operacion , 'carnet':'201212919'}
         #return "true de prueba" + str(resultado)+ "POST"+ str(postorden)
         try:
             r = requests.post("http://"+ipRecup+":5000/respuesta", data = nodo)
+            #r = requests.post("http://192.168.1.5:5000/respuesta", data = nodo)
             if r.status_code == 200:
-                return r.text
+                respuestaLocal = {'resultado': resultado ,'postorden': postorden , 'inorden' : operacion ,'ipRecup': ipRecup , 'enviado' : "true" , 'colaEjecucion': colaEjecucion}
+                return json.dumps(respuestaLocal, default = jsonDefault)
         except requests.exceptions.RequestException as e : 
             print e    
             return "No se pudo enviar el resultado"            
@@ -254,19 +280,70 @@ def operar():
         return "la cola esta vacia"
    
    
+###################################RESPUESTAS##########################
+class NodoDoble(object):
+    def __init__(self, ip = None , inorden= None,postorden= None, resultado= None, prox = None , ant = None):
+        self.inorden = inorden 
+        self.postorden = postorden 
+        self.resultado = resultado
+        self.ip = ip 
+        self.prox = prox
+        self.ant = ant
+    def __str__(self):
+        return str(self.inorden, self.postorden , self.resultado)
+
+class ListaDobleEnlazada(object):
+    def __init__(self):
+        self.primero = None
+        self.ultimo = None
+
+    def insertar(self, nodo = None):
+        if self.primero == None :
+            self.primero = nodo
+            self.ultimo = nodo
+        else :
+            nodo.prox = self.primero
+            self.primero.ant = nodo 
+            self.primero = nodo
+       
+    def imprimir(self):
+        aux = self.primero
+        while aux != None:
+            print "Nodo insertado :"+ str(aux.resultado)
+            aux = aux.prox  
+        print "fin de la lista"
+            
+listaRespuestas = ListaDobleEnlazada()
 @app.route('/respuesta',methods=['POST']) 
 def respuesta():
-    textoenviar = str(request.data)
+    #textoenviar = str(request.data)
     ipRecup = str(request.environ['REMOTE_ADDR'])
+    listaRespuestas.insertar(NodoDoble(ipRecup,request.form['inorden'], request.form['postorden'], request.form['resultado']))
+    listaRespuestas.imprimir()
     #print (str(textoenviar))
-    return "Repuesta de Estrellita " + textoenviar + ipRecup
+    #return "Repuesta de Estrellita " + textoenviar + ipRecup
+    return "true"
 
+@app.route('/getRespuestas',methods=['GET'])
+def getRespuestas():
+    contador = 0
+    listaRespuestasDTO = dict()
+    aux = listaRespuestas.primero
+    while aux != None:
+        contador +=1
+        respuestaLocal = {'resultado': str(aux.resultado) ,'postorden':str(aux.postorden), 'inorden': str(aux.inorden),'ipRecup': str(aux.ip)}
+        listaRespuestasDTO['respuesta'+ str(contador)] = respuestaLocal
+        print "Nodo insertado :"+ str(aux.resultado)
+        aux = aux.prox  
 
-#######################################################################
+    return json.dumps(listaRespuestasDTO, default = jsonDefault)
+    
+#################################################################################################
+   
 @app.route('/hola')
 def he():
     return "hola Mundo"
 
 if __name__ == "__main__":
-    #app.run(debug=True, host='192.168.10.101')
-    app.run(debug=True, host='192.168.1.5')
+   # app.run(debug=True, host='192.168.10.102')
+    app.run(debug=True, host='192.168.1.3')

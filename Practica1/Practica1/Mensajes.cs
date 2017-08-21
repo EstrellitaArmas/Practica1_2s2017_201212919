@@ -14,6 +14,7 @@ namespace Practica1
 {
     public partial class Mensajes : Form
     {
+        private string IP_LOCAL = "192.168.1.3";
         public Mensajes()
         {
             InitializeComponent();
@@ -55,7 +56,7 @@ namespace Practica1
                 StreamReader sr = new StreamReader(openFileDialog1.FileName);
                 String xml = sr.ReadToEnd();
                 MessageBox.Show(xml);
-                string url = "http://192.168.1.5:5000/cargaXML";
+                string url = "http://" + IP_LOCAL + ":5000/cargaXML";
                 //MessageBox.Show(HttpPost(url, openFileDialog1.FileName));
                 AnalizarXML(xml);
                 sr.Close();

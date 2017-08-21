@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.dataRespuestas = new System.Windows.Forms.DataGridView();
             this.carnet = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ip = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.inorden = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -37,25 +37,25 @@
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataRespuestas)).BeginInit();
             this.SuspendLayout();
             // 
-            // dataGridView1
+            // dataRespuestas
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataRespuestas.AllowUserToAddRows = false;
+            this.dataRespuestas.AllowUserToDeleteRows = false;
+            this.dataRespuestas.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataRespuestas.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.carnet,
             this.ip,
             this.inorden,
             this.postorden,
             this.resultado});
-            this.dataGridView1.Location = new System.Drawing.Point(1, 1);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
-            this.dataGridView1.Size = new System.Drawing.Size(548, 197);
-            this.dataGridView1.TabIndex = 0;
+            this.dataRespuestas.Location = new System.Drawing.Point(1, 1);
+            this.dataRespuestas.Name = "dataRespuestas";
+            this.dataRespuestas.ReadOnly = true;
+            this.dataRespuestas.Size = new System.Drawing.Size(548, 197);
+            this.dataRespuestas.TabIndex = 0;
             // 
             // carnet
             // 
@@ -122,17 +122,17 @@
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.dataGridView1);
+            this.Controls.Add(this.dataRespuestas);
             this.Name = "RespuestaMensajes";
             this.Text = "RespuestaMensajes";
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataRespuestas)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView dataRespuestas;
         private System.Windows.Forms.DataGridViewTextBoxColumn carnet;
         private System.Windows.Forms.DataGridViewTextBoxColumn ip;
         private System.Windows.Forms.DataGridViewTextBoxColumn inorden;

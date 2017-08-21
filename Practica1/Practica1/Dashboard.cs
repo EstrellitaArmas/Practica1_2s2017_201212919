@@ -19,11 +19,11 @@ namespace Practica1
 {
     public partial class Dashboard : Form
     {
+        private string IP_LOCAL = "192.168.1.3";
         public Dashboard()
         {
             InitializeComponent();
-            //string url = "http://162.168.10.:5000/get_my_ip";
-            string url = "http://192.168.1.5:5000/get_my_ip";
+            string url = "http://"+IP_LOCAL+":5000/get_my_ip";
             txtIp.Text = HttpGet(url);
 
         }
@@ -88,8 +88,8 @@ namespace Practica1
             {
                 using (var cliente = new WebClient())
                 {
-                    var respuestaConvertidaString = cliente.DownloadString("http://192.168.1.5:5000/conectado");
-                    //var respuestaConvertidaString = cliente.DownloadString("http://"+ipCarnet+":5000/conectado");
+                    //var respuestaConvertidaString = cliente.DownloadString("http://192.168.1.5:5000/conectado");
+                    var respuestaConvertidaString = cliente.DownloadString("http://"+ipCarnet+":5000/conectado");
                     Console.WriteLine(respuestaConvertidaString);                    
                 }
             }
@@ -98,97 +98,49 @@ namespace Practica1
                 Console.WriteLine(e);                
             }
         }
-        public void MetodoPost()
+        public void MetodoPost(string json)
         {
             using (var cliente = new WebClient())
             {
                 var variablesEnviar = new System.Collections.Specialized.NameValueCollection();
-                variablesEnviar["var1"] = "Hola";
-                variablesEnviar["var2"] = "Mundo";
+                variablesEnviar["json"] = json;
+                //variablesEnviar["var2"] = "Mundo";
 
-                var respuestaMetodo = cliente.UploadValues("http://192.168.10.104:5000/metodoPost", variablesEnviar);
+                var respuestaMetodo = cliente.UploadValues("http://192.168.10.102:5000/cargaJSON", variablesEnviar);
                 var respuestaConvertidaString = Encoding.Default.GetString(respuestaMetodo);
                 Console.WriteLine(respuestaConvertidaString);
+                jsonResponse = respuestaConvertidaString;
             }
         }
 
+        static string jsonResponse;
+       
+        static int contadorNodosCola;
         private void button1_Click(object sender, EventArgs e)
         {
-
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 StreamReader sr = new StreamReader(openFileDialog1.FileName);
-                String json = sr.ReadToEnd();
-
-                // MetodoGetConectado("192.168.10.104");
-                string url = "http://192.168.1.5:5000/cargaJSON";
-                string jsonResponse = HttpPost(url, json);
-                Console.WriteLine(jsonResponse);
+                string json = sr.ReadToEnd();
+                string url = "http://" + IP_LOCAL + ":5000/cargaJSON";
+                jsonResponse = HttpPost(url, json);
                 if (jsonResponse == null)
                 {
                     MessageBox.Show("VerifiqueConexion");
                 }
                 else
                 {
-                    dynamic stuff = JsonConvert.DeserializeObject(jsonResponse);
-
-                    //JArray ip = stuff.nodos.nodo;
-                    //foreach (object aPart in ip)
-                    //{
-                    //    Console.WriteLine(aPart);
-                    //}
-                    Console.WriteLine("0" + stuff.primero.ip);
-                    string estado = "false";
-                    if (stuff.primero.carnet != null)
-                    {
-                        estado = "true";
-                    }
-                    int contador = 1;
-                    string[] row0 = { "Nodo" + contador++, stuff.primero.ip, stuff.primero.carnet, estado };
-                    dataDash.Rows.Add(row0);
-                    if (stuff.primero.prox != null)
-                    {
-
-                        JObject name = stuff.primero.prox;
-                        stuff = JsonConvert.DeserializeObject(name.ToString());
-                        while (stuff.prox != null)
-                        {
-                            Console.WriteLine(stuff.ip);
-                            estado = "false";
-                            if (stuff.carnet.Equals('-'))
-                            {
-                                estado = "true";
-                            }
-                            string[] row1 = { "Nodo" + contador++, stuff.ip, stuff.carnet, estado };
-                            dataDash.Rows.Add(row1);
-                            name = stuff.prox;
-                            stuff = JsonConvert.DeserializeObject(name.ToString());
-
-                        }
-                        Console.WriteLine(stuff.ip);
-                        estado = "false";
-                        if (stuff.carnet.Equals('-'))
-                        {
-                            estado = "true";
-                        }
-                        string[] row2 = { "Nodo" + contador++, stuff.ip, stuff.carnet, estado };
-                        dataDash.Rows.Add(row2);
-                    }
-                    sr.Close();
+                    getStatus(jsonResponse);                    
                 }
+                sr.Close();
                 //refresh();
             }
 
         }
 
-        public void getStatus()
-        {
-            dataDash.Rows.Clear();
-            string url = "http://192.168.1.5:5000/getStatus";
-            string jsonResponse = HttpGet(url);
-
+        public void getStatus(string jsonResponse)
+        {            
             dynamic stuff = JsonConvert.DeserializeObject(jsonResponse);
-
             Console.WriteLine("1" + stuff.primero.ip);
             string estado = "false";
             int contador = 1;
@@ -196,7 +148,7 @@ namespace Practica1
             {
                 estado = "true";
             }
-            string[] row0 = { "Nodoresfresh"+ contador++, stuff.primero.ip, stuff.primero.carnet, estado };
+            string[] row0 = { "Nodo"+ contador++, stuff.primero.ip, stuff.primero.carnet, estado };
             dataDash.Rows.Add(row0);
             if (stuff.primero.prox != null)
             {
@@ -206,7 +158,7 @@ namespace Practica1
                 {
                     Console.WriteLine(stuff.ip);
                     estado = "false";
-                    if (stuff.carnet.Equals('-'))
+                    if (!stuff.carnet.Equals('-'))
                     {
                         estado = "true";
                     }
@@ -230,9 +182,10 @@ namespace Practica1
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
-            getStatus();
+            dataDash.Rows.Clear();
+            jsonResponse = HttpGet("http://" + IP_LOCAL + ":5000/getStatus");
+            getStatus(jsonResponse);
         }
-
-      
+        
     }
 }
